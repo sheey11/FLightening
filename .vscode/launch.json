@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            // This configuration launches Flightening's Web Server
+            // To make it work, open folder in vscode,
+            // and then press F5.
+            "name": "Run Flightening Web Server",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/webserver.go"
+        }
+    ]
+}
