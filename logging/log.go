@@ -28,7 +28,7 @@ func init() {
 	Warning = log.New(file, "[WARN] ", log.Ldate|log.Ltime|log.Lshortfile)
 	Error = log.New(file, "[ERRO] ", log.Ldate|log.Ltime|log.Lshortfile)
 
-	file, err = os.OpenFile("flightening.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	file, err = os.OpenFile("requests.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
