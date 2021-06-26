@@ -7,9 +7,7 @@ import (
 )
 
 var authChan = make(chan *gin.Context)
-var authResultChan = make(chan *Response)
 var registerChan = make(chan *gin.Context)
-var registerResultChan = make(chan *Response)
 
 type Response struct {
 	StatusCode int
@@ -34,7 +32,7 @@ func authHandle() {
 		c.BindJSON(&dto)
 
 		statusCode, ret := services.Login(dto.Username, dto.Password)
-		authResultChan <- &Response{statusCode, ret}
+		c.JSON(statusCode, ret)
 	}
 }
 
@@ -45,18 +43,14 @@ func registerHandle() {
 		c.BindJSON(&dto)
 
 		statusCode, ret := services.Register(dto.Username, dto.Password, dto.Phone, dto.Email)
-		registerResultChan <- &Response{statusCode, ret}
+		c.JSON(statusCode, ret)
 	}
 }
 
 func auth(c *gin.Context) {
 	authChan <- c
-	res := <-authResultChan
-	c.JSON(res.StatusCode, res.Result)
 }
 
 func register(c *gin.Context) {
 	registerChan <- c
-	res := <-registerResultChan
-	c.JSON(res.StatusCode, res.Result)
 }
