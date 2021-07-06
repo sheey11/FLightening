@@ -1,22 +1,23 @@
 package models
 
 import (
+	"FLightening/sqlconn"
 	"fmt"
 	"time"
 )
 
 type Order struct {
 	id     int
-	Shift  Shift
-	User   User
-	Price  float32
-	Status OrderStatus
-	Time   time.Time
+	shift  int
+	user   int
+	Price  float32     `json:"price"`
+	Status OrderStatus `json:"status"`
+	Time   time.Time   `json:"time"`
 }
 
 func (o *Order) GetUniqueID() string {
 	return fmt.Sprintf(
-		"%04d%02d%02d%02d%02d%02d%04d%05d%5d",
+		"%04d%02d%02d%02d%02d%02d%04d%05d%05d",
 		o.Time.Year(),
 		o.Time.Month(),
 		o.Time.Day(),
@@ -25,6 +26,18 @@ func (o *Order) GetUniqueID() string {
 		o.Time.Second(),
 		o.Time.Nanosecond()/1000,
 		o.id,
-		o.User.Id,
+		o.user,
 	)
+}
+
+func FindOrderById(id int) Order {
+	o := sqlconn.FindOrderById(id)
+	return Order{
+		id:     o.Id,
+		shift:  o.Shift,
+		user:   o.User,
+		Price:  o.Price,
+		Status: o.Status,
+		Time:   o.Time,
+	}
 }

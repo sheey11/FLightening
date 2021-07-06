@@ -3,6 +3,7 @@ package sqlconn
 import (
 	"database/sql"
 	"errors"
+	"regexp"
 
 	"github.com/doug-martin/goqu/v9"
 )
@@ -104,9 +105,17 @@ func AddUser(username, password, salt, phone, email string) error {
 func UpdateInfo(email, phone string, id int) error {
 	attr := goqu.Record{}
 	if len(email) != 0 {
+		emailMatch, _ := regexp.MatchString("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])", email)
+		if !emailMatch {
+			return errors.New("邮箱格式不正确")
+		}
 		attr["email"] = email
 	}
 	if len(phone) != 0 {
+		phoneMatch, _ := regexp.MatchString("^\\d{11}$", phone)
+		if !phoneMatch {
+			return errors.New("手机号格式不正确")
+		}
 		attr["phone"] = phone
 	}
 	_sql, _, _ := dialect.From("users").Update().Set(attr).Where(goqu.Ex{"id": id}).ToSQL()

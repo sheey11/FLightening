@@ -108,10 +108,16 @@ func Register(username string, password string, phone string, email string) (int
 }
 
 func UpdateInfo(info map[string]interface{}, id int) (int, gin.H) {
-	email := info["email"].(string)
-	phone := info["phone"].(string)
-	err := sqlconn.UpdateInfo(email, phone, id)
-	if err != nil {
+	email, o := info["email"]
+	if !o {
+		email = ""
+	}
+	phone, o := info["phone"]
+	if !o {
+		phone = ""
+	}
+	err := sqlconn.UpdateInfo(email.(string), phone.(string), id)
+	if err == nil {
 		return http.StatusOK, gin.H{
 			"code": 200,
 			"msg":  "已保存",

@@ -2,6 +2,7 @@ package routers
 
 import (
 	"FLightening/middlewares"
+	"FLightening/models"
 	"FLightening/services"
 	"net/http"
 
@@ -11,7 +12,7 @@ import (
 func mountOrderRouter(router *gin.RouterGroup) {
 	g := router.Group("order")
 	g.Use(middlewares.AuthRequired())
-	g.GET("/book", bookTicket)
+	g.POST("/book", bookTicket)
 }
 
 func bookTicket(c *gin.Context) {
@@ -35,10 +36,16 @@ func bookTicket(c *gin.Context) {
 			"msg":  e.Error(),
 		})
 	} else {
+		o := models.FindOrderById(oid)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
 			"msg":  "芜湖",
-			"data": ""
+			"data": gin.H{
+				"price":  o.Price,
+				"status": o.Status,
+				"time":   o.Time,
+				"uid":    o.GetUniqueID(),
+			},
 		})
 	}
 }

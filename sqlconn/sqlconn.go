@@ -3,6 +3,7 @@ package sqlconn
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/mysql"
@@ -13,6 +14,10 @@ var db *sql.DB = nil
 var dialect goqu.DialectWrapper
 
 func init() {
+	if db != nil {
+		return
+	}
+
 	err := Connect()
 	if err != nil {
 		panic(err)
@@ -27,7 +32,12 @@ func init() {
 }
 
 func Connect() error {
-	conn, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/Flightening")
+	connStr := os.Getenv("MYSQL_CONN_STR")
+	if connStr == "" {
+		connStr = "root:@tcp(127.0.0.1:3306)/Flightening?parseTime=true"
+	}
+
+	conn, err := sql.Open("mysql", connStr)
 	if err == nil {
 		db = conn
 	}
