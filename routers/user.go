@@ -10,13 +10,15 @@ import (
 
 func mountUserRouters(router *gin.RouterGroup) {
 	userRouter := router.Group("/user")
+
 	userRouter.Use(middlewares.AuthRequired())
-	userRouter.POST("/me", getInfo)
+	userRouter.GET("/me", getInfo)
+	userRouter.PUT("/me", updateInfo)
 }
 
 func getInfo(c *gin.Context) {
-	jwt, _ := services.GetJwtByContext(c)
-	u, ok := services.GetUserByJwt(jwt)
+	u, ok := services.GetUserByContext(c)
+
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"code": -1,
@@ -34,4 +36,22 @@ func getInfo(c *gin.Context) {
 			"blocked":   u.Blocked,
 		},
 	})
+}
+
+func updateInfo(c *gin.Context) {
+	u, ok := services.GetUserByContext(c)
+
+	if !ok {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "无法找到用户",
+		})
+		return
+	}
+
+	body := make(map[string]interface{})
+	c.BindJSON(&body)
+
+	code, res := services.UpdateInfo(body, u.Id)
+	c.JSON(code, res)
 }

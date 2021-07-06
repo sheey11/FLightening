@@ -91,3 +91,11 @@ func GetJwtByContext(c *gin.Context) (string, bool) {
 
 	return "", false
 }
+
+func GetUserByContext(c *gin.Context) (*models.User, bool) {
+	jwt, ok := GetJwtByContext(c)
+	if !ok {
+		return nil, false
+	}
+	return GetUserByJwt(jwt)
+}

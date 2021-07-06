@@ -93,10 +93,33 @@ func AddUser(username, password, salt, phone, email string) error {
 		return errors.New("邮箱已被注册")
 	}
 
-	sql, _, _ := dialect.From("users").Insert().Rows(
+	_sql, _, _ := dialect.From("users").Insert().Rows(
 		dbuser{username, password, salt, phone, email, 0, 0},
 	).ToSQL()
 
-	_, err := db.Exec(sql)
+	_, err := db.Exec(_sql)
+	return err
+}
+
+func UpdateInfo(email, phone string, id int) error {
+	attr := goqu.Record{}
+	if len(email) != 0 {
+		attr["email"] = email
+	}
+	if len(phone) != 0 {
+		attr["phone"] = phone
+	}
+	_sql, _, _ := dialect.From("users").Update().Set(attr).Where(goqu.Ex{"id": id}).ToSQL()
+	tx, _ := db.Begin()
+
+	r, err := tx.Exec(_sql)
+	rowsAff, _ := r.RowsAffected()
+
+	if rowsAff != 1 || err != nil {
+		tx.Rollback()
+	} else {
+		tx.Commit()
+	}
+
 	return err
 }

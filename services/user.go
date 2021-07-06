@@ -2,6 +2,7 @@ package services
 
 import (
 	"FLightening/models"
+	"FLightening/sqlconn"
 	"net/http"
 	"regexp"
 	"strings"
@@ -44,10 +45,11 @@ func Login(username string, password string) (int, gin.H) {
 }
 
 func Register(username string, password string, phone string, email string) (int, gin.H) {
-	if len(phone) != 11 {
+	phoneMatch, _ := regexp.MatchString("^\\d{11}$", phone)
+	if !phoneMatch {
 		return http.StatusBadRequest, gin.H{
 			"code": -1,
-			"msg":  "手机号长度不正确",
+			"msg":  "手机号格式不正确",
 		}
 	}
 
@@ -59,7 +61,7 @@ func Register(username string, password string, phone string, email string) (int
 		}
 	}
 
-	usernameMatch, _ := regexp.MatchString("^.[a-zA-Z][a-zA-Z\\d]{5,11}$", username)
+	usernameMatch, _ := regexp.MatchString("^[a-zA-Z][a-zA-Z\\d]{5,11}$", username)
 	if !usernameMatch {
 		return http.StatusBadRequest, gin.H{
 			"code": -3,
@@ -102,5 +104,29 @@ func Register(username string, password string, phone string, email string) (int
 		"code": 200,
 		"msg":  "注册成功",
 		"jwt":  jwt,
+	}
+}
+
+func UpdateInfo(info map[string]interface{}, id int) (int, gin.H) {
+	email := info["email"].(string)
+	phone := info["phone"].(string)
+	err := sqlconn.UpdateInfo(email, phone, id)
+	if err != nil {
+		return http.StatusOK, gin.H{
+			"code": 200,
+			"msg":  "已保存",
+		}
+	} else {
+		if strings.Contains(err.Error(), "SQL") {
+			return http.StatusBadRequest, gin.H{
+				"code": -2,
+				"msg":  "未知错误",
+			}
+		} else {
+			return http.StatusBadRequest, gin.H{
+				"code": -1,
+				"msg":  err.Error(),
+			}
+		}
 	}
 }

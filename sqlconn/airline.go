@@ -8,6 +8,7 @@ import (
 
 func FindAirlineByOriginAndDest(origin, dest, page int) (*sql.Rows, error) {
 	sql, _, _ := dialect.Select(
+		goqu.I("airline.id").As("id"),
 		goqu.I("airline.name").As("airline_id"),
 		goqu.I("am.name").As("model"),
 		goqu.I("p1.name").As("origin"),
@@ -23,12 +24,14 @@ func FindAirlineByOriginAndDest(origin, dest, page int) (*sql.Rows, error) {
 		goqu.I("airlinecompanies").As("ac"),
 		goqu.I("airplanemodel").As("am"),
 	).Where(goqu.Ex{
-		"airline.origin":      origin,
-		"airline.destination": dest,
-		"p1.id":               origin,
-		"p2.id":               dest,
-		"airline.affiliate":   goqu.I("ac.id"),
-		"airline.model":       goqu.I("am.id"),
+		"c1.id":             origin,
+		"c2.id":             dest,
+		"p1.city":           goqu.I("c1.id"),
+		"p2.city":           goqu.I("c2.id"),
+		"p1.id":             goqu.I("airline.origin"),
+		"p2.id":             goqu.I("airline.destination"),
+		"airline.affiliate": goqu.I("ac.id"),
+		"airline.model":     goqu.I("am.id"),
 	}).Limit(10).Offset(uint(page-1) * 10).Distinct().ToSQL()
 
 	rows, err := db.Query(sql)
