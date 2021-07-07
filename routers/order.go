@@ -39,7 +39,7 @@ func bookTicket(c *gin.Context) {
 		o := models.FindOrderById(oid)
 		c.JSON(http.StatusOK, gin.H{
 			"code": 200,
-			"msg":  "芜湖",
+			"msg":  "订票成功",
 			"data": gin.H{
 				"price":  o.Price,
 				"status": o.Status,
