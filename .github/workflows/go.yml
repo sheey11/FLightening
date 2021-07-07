@@ -28,12 +28,16 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ steps.vars.outputs.sha_short }}
+        release_name: Release ${{ steps.vars.outputs.sha_short }}
         body: |
           Update
         draft: false
         prerelease: false
+
+    - name: Set short sha
+      id: vars
+      run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
     - name: Upload Release Asset
       id: upload-release-asset 
