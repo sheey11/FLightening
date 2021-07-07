@@ -23,6 +23,7 @@ func FindNearestNShifts(n uint, airline int) (*sql.Rows, error) {
 		"business_price",
 		"first_price",
 		"remaining_seat",
+		"airline",
 	).
 		From("shifts").
 		Limit(n).
@@ -34,6 +35,29 @@ func FindNearestNShifts(n uint, airline int) (*sql.Rows, error) {
 		}).
 		ToSQL()
 	return db.Query(_sql)
+}
+
+func FindShiftById(id int) *sql.Row {
+	_sql, _, _ := dialect.Select(
+		"id",
+		"scheduled_takeoff",
+		"scheduled_landing",
+		"actual_takeoff",
+		"actual_landing",
+		"status",
+		"economy_price",
+		"premium_price",
+		"business_price",
+		"first_price",
+		"remaining_seat",
+		"airline",
+	).
+		From("shifts").
+		Where(goqu.Ex{
+			"id": id,
+		}).
+		ToSQL()
+	return db.QueryRow(_sql)
 }
 
 func ShiftExistsAndVacancy(id int) int {

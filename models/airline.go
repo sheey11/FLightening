@@ -13,6 +13,16 @@ type Airline struct {
 	Shifts      []Shift `json:"shifts"`
 }
 
+type AirlineWithoutShifts struct {
+	id          int
+	Name        string `json:"id"`
+	Affiliate   string `json:"affiliate"`
+	CompanyLogo string `json:"logo"`
+	Model       string `json:"model"`
+	Origin      string `json:"origin"`
+	Destination string `json:"dest"`
+}
+
 func (a Airline) GetId() int {
 	return a.id
 }
@@ -34,4 +44,13 @@ func FindAirlineByOriginAndDest(origin, dest, page int) []Airline {
 	}
 
 	return ret
+}
+
+func FindAirlineById(id int) AirlineWithoutShifts {
+	row := sqlconn.FindAirlineById(id)
+
+	airline := AirlineWithoutShifts{}
+	row.Scan(&airline.id, &airline.Name, &airline.Model, &airline.Origin, &airline.Destination, &airline.Affiliate, &airline.CompanyLogo)
+
+	return airline
 }

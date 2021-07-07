@@ -5,6 +5,7 @@ import (
 	"FLightening/models"
 	"FLightening/services"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,6 +14,7 @@ func mountOrderRouter(router *gin.RouterGroup) {
 	g := router.Group("order")
 	g.Use(middlewares.AuthRequired())
 	g.POST("/book", bookTicket)
+	g.GET("/mine", fetchOrders)
 }
 
 func bookTicket(c *gin.Context) {
@@ -48,4 +50,37 @@ func bookTicket(c *gin.Context) {
 			},
 		})
 	}
+}
+
+func fetchOrders(c *gin.Context) {
+	u, _ := services.GetUserByContext(c)
+	pagestr := c.Query("page")
+	var page uint
+	if pagestr == "" {
+		page = 1
+	} else {
+		p, err := strconv.ParseUint(pagestr, 10, 16)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"code": -1,
+				"msg":  "页号有误",
+			})
+			return
+		}
+		page = uint(p)
+	}
+
+	orders, err := models.FetchOrders(u.Id, page)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":  -2,
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": orders,
+	})
 }

@@ -26,3 +26,27 @@ func FindOrderById(id int) OrderDO {
 	r.Scan(&o.Id, &o.Shift, &o.User, &o.Price, &o.Status, &o.Time)
 	return o
 }
+
+func FetchOrders(uid int, page uint) ([]OrderDO, error) {
+	if page == 0 {
+		page = 1
+	}
+
+	_sql, _, _ := dialect.Select("*").From("orders").Where(goqu.Ex{
+		"user": uid,
+	}).Limit(10).Offset(uint(page-1) * 10).ToSQL()
+
+	rows, err := db.Query(_sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ret := make([]OrderDO, 0)
+	for rows.Next() {
+		o := OrderDO{}
+		rows.Scan(&o.Id, &o.Shift, &o.User, &o.Price, &o.Status, &o.Time)
+		ret = append(ret, o)
+	}
+	return ret, nil
+}
