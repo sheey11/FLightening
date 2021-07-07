@@ -4,6 +4,7 @@ import (
 	"FLightening/middlewares"
 	"FLightening/models"
 	"FLightening/services"
+	"FLightening/sqlconn"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,7 @@ func mountOrderRouter(router *gin.RouterGroup) {
 	g.GET("/mine", fetchOrders)
 	g.POST("/complete", markAsComplete)
 	g.POST("/cancel", markAsCanceled)
+	g.GET("/:id", orderDetail)
 }
 
 func bookTicket(c *gin.Context) {
@@ -152,5 +154,37 @@ func markAsCanceled(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "成功",
+	})
+}
+
+func orderDetail(c *gin.Context) {
+	oidStr := c.Param("id")
+	if len(oidStr) != 28 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "订单号错误",
+		})
+		return
+	}
+	oid, err := strconv.Atoi(oidStr[23:])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "订单号错误",
+		})
+		return
+	}
+
+	r, err := sqlconn.FindPassenger(oid)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "查找乘客时出现错误",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": r,
 	})
 }

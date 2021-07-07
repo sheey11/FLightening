@@ -78,6 +78,30 @@ func FetchOrders(uid int, page uint) ([]OrderWithDetailedShift, error) {
 	return ods, nil
 }
 
+func FetchAllOrders(page uint) ([]OrderWithDetailedShift, error) {
+	orders, err := sqlconn.FetchAllOrders(page)
+	if err != nil {
+		return nil, err
+	}
+
+	ods := make([]OrderWithDetailedShift, 0)
+
+	for _, o := range orders {
+		shift := FindShiftById(o.Shift)
+		ods = append(ods, OrderWithDetailedShift{
+			id:      o.Id,
+			user:    o.User,
+			Shift:   shift,
+			Airline: FindAirlineById(shift.airline),
+			Price:   o.Price,
+			Status:  o.Status,
+			Time:    o.Time,
+			Uid:     (&Order{o.Id, o.Shift, o.User, o.Price, o.Status, o.Time}).GetUniqueID(),
+		})
+	}
+	return ods, nil
+}
+
 func MarkAsComplete(oid, uid int) error {
 	return sqlconn.MarkStatus(oid, uid, OrderPaid)
 }

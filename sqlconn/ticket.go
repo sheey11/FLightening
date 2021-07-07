@@ -96,3 +96,22 @@ func BookTicket(cabin, shift int, pass []Passenger, user int) (int, error) {
 	tx.Commit()
 	return oid, nil
 }
+
+func FindPassenger(order int) ([]Passenger, error) {
+	_sql, _, _ := dialect.From("seats").Where(
+		goqu.Ex{"affiliate_order": order},
+	).Select("passenger_name", "passenger_id").ToSQL()
+
+	rows, err := db.Query(_sql)
+	if err != nil {
+		return make([]Passenger, 0), err
+	}
+
+	pass := make([]Passenger, 0)
+	for rows.Next() {
+		p := Passenger{}
+		rows.Scan(&p.Name, &p.ID)
+		p.ID = p.ID[:6]
+	}
+	return pass, nil
+}

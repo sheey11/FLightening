@@ -8,6 +8,15 @@ import (
 	"github.com/doug-martin/goqu/v9"
 )
 
+func FetchAllUsers(page uint) (*sql.Rows, error) {
+	if db == nil {
+		return nil, errors.New("database is not connected")
+	}
+
+	_sql, _, _ := dialect.From("users").Select("*").Limit(10).Offset(uint(page-1) * 10).ToSQL()
+	return db.Query(_sql)
+}
+
 func FindUserByUsername(username string) (*sql.Row, error) {
 	if db == nil {
 		return nil, errors.New("database is not connected")

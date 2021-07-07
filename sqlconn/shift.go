@@ -60,6 +60,28 @@ func FindShiftById(id int) *sql.Row {
 	return db.QueryRow(_sql)
 }
 
+func FetchAllShifts(page uint) (*sql.Rows, error) {
+	_sql, _, _ := dialect.Select(
+		"id",
+		"scheduled_takeoff",
+		"scheduled_landing",
+		"actual_takeoff",
+		"actual_landing",
+		"status",
+		"economy_price",
+		"premium_price",
+		"business_price",
+		"first_price",
+		"remaining_seat",
+		"airline",
+	).
+		From("shifts").
+		Limit(10).
+		Offset(uint(page-1) * 10).
+		ToSQL()
+	return db.Query(_sql)
+}
+
 func ShiftExistsAndVacancy(id int) int {
 	// ensure exist
 	_sql, _, _ := dialect.Select(goqu.COUNT("id")).From("shifts").Where(goqu.Ex{

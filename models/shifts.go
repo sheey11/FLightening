@@ -89,3 +89,42 @@ func FindShiftById(id int) Shift {
 
 	return shift
 }
+
+func FetchAllShifts(page uint) []Shift {
+	rows, err := sqlconn.FetchAllShifts(page)
+
+	if err != nil {
+		return make([]Shift, 0)
+	} else {
+		defer rows.Close()
+	}
+
+	shifts := make([]Shift, 0)
+
+	for rows.Next() {
+		shift := Shift{}
+		rows.Scan(
+			&shift.Id,
+			&shift.TakeOff,
+			&shift.Landing,
+			&shift.ActualTakeOff,
+			&shift.ActualLanding,
+			&shift.Status,
+			&shift.EcoPrice,
+			&shift.PrePrice,
+			&shift.BusPrice,
+			&shift.FirPrice,
+			&shift.Vacancy,
+			&shift.airline,
+		)
+		if shift.ActualLanding_Null.Valid {
+			shift.ActualLanding = &shift.ActualLanding_Null.Time
+		}
+		if shift.ActualTakeOff_Null.Valid {
+			shift.ActualTakeOff = &shift.ActualTakeOff_Null.Time
+		}
+		shifts = append(shifts, shift)
+	}
+
+	return shifts
+}

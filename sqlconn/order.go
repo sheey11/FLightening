@@ -52,6 +52,28 @@ func FetchOrders(uid int, page uint) ([]OrderDO, error) {
 	return ret, nil
 }
 
+func FetchAllOrders(page uint) ([]OrderDO, error) {
+	if page == 0 {
+		page = 1
+	}
+
+	_sql, _, _ := dialect.Select("*").From("orders").Limit(10).Offset(uint(page-1) * 10).ToSQL()
+
+	rows, err := db.Query(_sql)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ret := make([]OrderDO, 0)
+	for rows.Next() {
+		o := OrderDO{}
+		rows.Scan(&o.Id, &o.Shift, &o.User, &o.Price, &o.Status, &o.Time)
+		ret = append(ret, o)
+	}
+	return ret, nil
+}
+
 func MarkStatus(oid, uid, status int) error {
 	_sql, _, _ := dialect.From("orders").Where(goqu.Ex{"id": oid, "user": uid}).Update().Set(
 		goqu.Record{"status": status},

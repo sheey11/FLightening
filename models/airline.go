@@ -54,3 +54,22 @@ func FindAirlineById(id int) AirlineWithoutShifts {
 
 	return airline
 }
+
+func FetchAllAirlines(page uint) []Airline {
+	rows, err := sqlconn.FetchAllAirlines(page)
+	defer rows.Close()
+
+	if err != nil {
+		return nil
+	}
+
+	ret := make([]Airline, 0)
+
+	for rows.Next() {
+		airline := Airline{}
+		rows.Scan(&airline.id, &airline.Name, &airline.Model, &airline.Origin, &airline.Destination, &airline.Affiliate, &airline.CompanyLogo)
+		ret = append(ret, airline)
+	}
+
+	return ret
+}

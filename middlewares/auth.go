@@ -20,3 +20,17 @@ func AuthRequired() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func AdminAuthRequired() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		jwt, ok := services.GetAdminJwtByContext(c)
+		if !ok || !services.VerifyAdminJwt(jwt) {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": 401,
+				"msg":  "请先登录",
+			})
+			c.Abort()
+		}
+		c.Next()
+	}
+}

@@ -7,4 +7,5 @@ func MountRouters(router *gin.RouterGroup) {
 	mountUserRouters(router)
 	mountAirlineRouter(router)
 	mountOrderRouter(router)
+	mountAdminRouters(router)
 }
