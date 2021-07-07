@@ -22,6 +22,27 @@ type AirlineSearchDTO struct {
 
 type BookingDTO struct {
 	Shift     int                 `json:"shift" binding:"required"`
-	Cabin     int                 `json:"cabin" binding:"required"`
+	Cabin     *int                `json:"cabin" binding:"required"`
 	Passenger []sqlconn.Passenger `json:"passenger"`
+}
+
+type CityDTO struct {
+	Name     string `json:"name" binding:"required"`
+	Province *int   `json:"province" binding:"required"`
+	Code     string `json:"code" binding:"required"`
+}
+
+type CityUpdateDTO struct {
+	Id       int    `json:"id" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	Province *int   `json:"province" binding:"required"`
+	Code     string `json:"code" binding:"required"`
+}
+
+type ProvinceDTO struct {
+	Name string `json:"name" binding:"required"`
+}
+type ProvinceUpdateDTO struct {
+	Id   int    `json:"id" binding:"required"`
+	Name string `json:"name" binding:"required"`
 }

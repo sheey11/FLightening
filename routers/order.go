@@ -34,7 +34,7 @@ func bookTicket(c *gin.Context) {
 		})
 	}
 
-	oid, e := services.BookTicket(dto.Cabin, u.Id, dto.Shift, dto.Passenger)
+	oid, e := services.BookTicket(*dto.Cabin, u.Id, dto.Shift, dto.Passenger)
 
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{

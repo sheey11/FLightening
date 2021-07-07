@@ -159,3 +159,31 @@ func FetchAllAirlines(page uint) (*sql.Rows, error) {
 
 	return db.Query(_sql)
 }
+
+func AddAirline(name string, affiliate, model, origin, destination int) error {
+	_sql, _, _ := dialect.From("airlines").Insert().Rows(
+		goqu.Record{
+			"name":        name,
+			"affiliate":   affiliate,
+			"model":       model,
+			"origin":      origin,
+			"destination": destination,
+		},
+	).ToSQL()
+	_, err := db.Exec(_sql)
+	return err
+}
+
+func UpadteAirline(id int, name string, affiliate, model, origin, destination int) error {
+	_sql, _, _ := dialect.From("airlines").Update().Set(
+		goqu.Record{
+			"name":        name,
+			"affiliate":   affiliate,
+			"model":       model,
+			"origin":      origin,
+			"destination": destination,
+		},
+	).ToSQL()
+	_, err := db.Exec(_sql)
+	return err
+}

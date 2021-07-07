@@ -4,6 +4,7 @@ import (
 	"FLightening/middlewares"
 	"FLightening/models"
 	"FLightening/services"
+	"FLightening/sqlconn"
 	"net/http"
 	"strconv"
 
@@ -18,9 +19,19 @@ func mountAdminRouters(router *gin.RouterGroup) {
 	adminRouter.GET("/orders", fetchAllOrders)
 	adminRouter.GET("/users", fetchAllUsers)
 	adminRouter.GET("/shifts", fetchAllShifts)
+	adminRouter.GET("/airlines", fetchAllAirlines)
+	adminRouter.GET("/province", fetchAllProvince)
 
 	adminRouter.GET("/orders/:id", orderDetail)
+	adminRouter.GET("/orders/filter/user/:id", orderDetail)
+
 	adminRouter.GET("/users/:id", getUserInfo)
+
+	adminRouter.POST("/city", addCity)
+	adminRouter.POST("/province", addProvince)
+
+	adminRouter.PUT("/city", updateCity)
+	adminRouter.PUT("/province", updateProvince)
 }
 
 func adminAuth(c *gin.Context) {
@@ -29,6 +40,14 @@ func adminAuth(c *gin.Context) {
 
 	statusCode, ret := services.AdminLogin(dto.Username, dto.Password)
 	c.JSON(statusCode, ret)
+}
+
+func fetchAllProvince(c *gin.Context) {
+	ps := models.FetchAllProvince()
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"data": ps,
+	})
 }
 
 func fetchAllOrders(c *gin.Context) {
@@ -94,5 +113,98 @@ func getUserInfo(c *gin.Context) {
 			"validated": u.Validated,
 			"blocked":   u.Blocked,
 		},
+	})
+}
+
+func addCity(c *gin.Context) {
+	ct := CityDTO{}
+	e := c.BindJSON(&ct)
+	if e != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "请求参数错误",
+		})
+		return
+	}
+	e = sqlconn.AddCity(ct.Name, *ct.Province, ct.Code)
+	if e != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "无法获取用户",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功",
+	})
+}
+
+func addProvince(c *gin.Context) {
+	ct := ProvinceDTO{}
+	c.BindJSON(&ct)
+	e := sqlconn.AddProvince(ct.Name)
+	if e != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "无法获取用户",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功",
+	})
+}
+
+func updateCity(c *gin.Context) {
+	ct := CityUpdateDTO{}
+	err := c.BindJSON(&ct)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "请检查请求",
+		})
+		return
+	}
+
+	err = sqlconn.UpdateCity(ct.Id, ct.Name, *ct.Province, ct.Code)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": -2,
+			"msg":  "更新失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "好了",
+	})
+}
+
+func updateProvince(c *gin.Context) {
+	ct := ProvinceUpdateDTO{}
+	err := c.BindJSON(&ct)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "请检查请求",
+		})
+		return
+	}
+
+	err = sqlconn.UpdateProvince(ct.Id, ct.Name)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": -2,
+			"msg":  "更新失败",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "好了",
 	})
 }
