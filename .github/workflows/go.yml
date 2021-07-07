@@ -22,7 +22,6 @@ jobs:
     - name: Build
       run: | 
         go build
-        ls -alh
 
     - name: Create Release
       id: create_release
