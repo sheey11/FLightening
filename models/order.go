@@ -2,6 +2,7 @@ package models
 
 import (
 	"FLightening/sqlconn"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -23,6 +24,7 @@ type OrderWithDetailedShift struct {
 	Price   float32              `json:"price"`
 	Status  OrderStatus          `json:"status"`
 	Time    time.Time            `json:"time"`
+	Uid     string               `json:"uid"`
 }
 
 func (o *Order) GetUniqueID() string {
@@ -35,8 +37,8 @@ func (o *Order) GetUniqueID() string {
 		o.Time.Minute(),
 		o.Time.Second(),
 		o.Time.Nanosecond()/1000,
-		o.id,
 		o.user,
+		o.id,
 	)
 }
 
@@ -70,7 +72,20 @@ func FetchOrders(uid int, page uint) ([]OrderWithDetailedShift, error) {
 			Price:   o.Price,
 			Status:  o.Status,
 			Time:    o.Time,
+			Uid:     (&Order{o.Id, o.Shift, uid, o.Price, o.Status, o.Time}).GetUniqueID(),
 		})
 	}
 	return ods, nil
+}
+
+func MarkAsComplete(oid, uid int) error {
+	return sqlconn.MarkStatus(oid, uid, OrderPaid)
+}
+
+func MarkAsCanceled(oid, uid int) error {
+	ok := sqlconn.RestoreReleventSeatVacancy(oid, uid)
+	if !ok {
+		return errors.New("更新座位时出现问题")
+	}
+	return sqlconn.MarkStatus(oid, uid, OrderCanceled)
 }

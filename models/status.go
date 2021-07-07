@@ -22,4 +22,5 @@ type OrderStatus = int
 const (
 	OrderToBePaied = iota
 	OrderPaid
+	OrderCanceled = -1
 )

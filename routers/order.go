@@ -15,6 +15,8 @@ func mountOrderRouter(router *gin.RouterGroup) {
 	g.Use(middlewares.AuthRequired())
 	g.POST("/book", bookTicket)
 	g.GET("/mine", fetchOrders)
+	g.POST("/complete", markAsComplete)
+	g.POST("/cancel", markAsCanceled)
 }
 
 func bookTicket(c *gin.Context) {
@@ -46,7 +48,7 @@ func bookTicket(c *gin.Context) {
 				"price":  o.Price,
 				"status": o.Status,
 				"time":   o.Time,
-				"uid":    o.GetUniqueID(),
+				"id":     o.GetUniqueID(),
 			},
 		})
 	}
@@ -82,5 +84,73 @@ func fetchOrders(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"data": orders,
+	})
+}
+
+func markAsComplete(c *gin.Context) {
+	uidStr := c.Query("uid")
+	if len(uidStr) != 28 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "订单号错误",
+		})
+		return
+	}
+	uid, err := strconv.Atoi(uidStr[23:])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "订单号错误",
+		})
+		return
+	}
+
+	u, _ := services.GetUserByContext(c)
+	err = models.MarkAsComplete(uid, u.Id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -2,
+			"msg":  "更新订单时出现错误",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功",
+	})
+}
+
+func markAsCanceled(c *gin.Context) {
+	oidStr := c.Query("uid")
+	if len(oidStr) != 28 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "订单号错误",
+		})
+		return
+	}
+	oid, err := strconv.Atoi(oidStr[23:])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "订单号错误",
+		})
+		return
+	}
+
+	u, _ := services.GetUserByContext(c)
+	err = models.MarkAsCanceled(oid, u.Id)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -2,
+			"msg":  "更新订单时出现错误",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功",
 	})
 }
