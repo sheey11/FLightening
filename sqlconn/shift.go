@@ -62,20 +62,22 @@ func FindShiftById(id int) *sql.Row {
 
 func FetchAllShifts(page uint) (*sql.Rows, error) {
 	_sql, _, _ := dialect.Select(
-		"id",
-		"scheduled_takeoff",
-		"scheduled_landing",
-		"actual_takeoff",
-		"actual_landing",
-		"status",
-		"economy_price",
-		"premium_price",
-		"business_price",
-		"first_price",
-		"remaining_seat",
-		"airline",
+		"shifts.id",
+		"shifts.scheduled_takeoff",
+		"shifts.scheduled_landing",
+		"shifts.actual_takeoff",
+		"shifts.actual_landing",
+		"shifts.status",
+		"shifts.economy_price",
+		"shifts.premium_price",
+		"shifts.business_price",
+		"shifts.first_price",
+		"shifts.remaining_seat",
+		"shifts.airline",
+		"airline.name",
 	).
-		From("shifts").
+		From("shifts", "airline").
+		Where(goqu.Ex{"shifts.airline": goqu.I("airline.id")}).
 		Limit(10).
 		Offset(uint(page-1) * 10).
 		ToSQL()

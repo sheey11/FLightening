@@ -10,14 +10,14 @@ import (
 )
 
 type User struct {
-	Id        int
-	Username  string
+	Id        int    `json:"id"`
+	Username  string `json:"username"`
 	password  string
 	salt      string
-	Phone     string
-	Email     string
-	Validated BitBool
-	Blocked   BitBool
+	Phone     string  `json:"phone"`
+	Email     string  `json:"email"`
+	Validated BitBool `json:"validated"`
+	Blocked   BitBool `json:"blocked"`
 }
 
 type BitBool bool

@@ -12,7 +12,7 @@ func genAdminJwt(u models.Admin) (string, error) {
 		"username": u.Username,
 		"uid":      u.Id,
 	}
-	return CreateJwt(payload)
+	return CreateAdminJwt(payload)
 }
 
 func AdminLogin(username string, password string) (int, gin.H) {

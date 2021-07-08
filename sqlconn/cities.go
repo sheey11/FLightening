@@ -36,12 +36,11 @@ func AddCity(name string, province int, code string) error {
 	return err
 }
 
-func UpdateCity(id int, name string, province int, code string) error {
+func UpdateCity(id int, name string, code string) error {
 	_sql, _, _ := dialect.Update("cities").Set(
 		goqu.Record{
-			"name":     name,
-			"province": province,
-			"code":     code,
+			"name": name,
+			"code": code,
 		},
 	).Where(goqu.Ex{
 		"id": id,

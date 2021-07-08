@@ -33,10 +33,9 @@ type CityDTO struct {
 }
 
 type CityUpdateDTO struct {
-	Id       int    `json:"id" binding:"required"`
-	Name     string `json:"name" binding:"required"`
-	Province *int   `json:"province" binding:"required"`
-	Code     string `json:"code" binding:"required"`
+	Id   int    `json:"id" binding:"required"`
+	Name string `json:"name" binding:"required"`
+	Code string `json:"code" binding:"required"`
 }
 
 type ProvinceDTO struct {

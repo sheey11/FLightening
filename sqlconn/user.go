@@ -13,6 +13,10 @@ func FetchAllUsers(page uint) (*sql.Rows, error) {
 		return nil, errors.New("database is not connected")
 	}
 
+	if page == 0 {
+		page = 1
+	}
+
 	_sql, _, _ := dialect.From("users").Select("*").Limit(10).Offset(uint(page-1) * 10).ToSQL()
 	return db.Query(_sql)
 }
@@ -128,6 +132,42 @@ func UpdateInfo(email, phone string, id int) error {
 		attr["phone"] = phone
 	}
 	_sql, _, _ := dialect.From("users").Update().Set(attr).Where(goqu.Ex{"id": id}).ToSQL()
+	tx, _ := db.Begin()
+
+	r, err := tx.Exec(_sql)
+	rowsAff, _ := r.RowsAffected()
+
+	if rowsAff != 1 || err != nil {
+		tx.Rollback()
+	} else {
+		tx.Commit()
+	}
+
+	return err
+}
+
+func BlockUser(id int) error {
+	_sql, _, _ := dialect.From("users").Update().Set(
+		goqu.Record{"blocked": 1},
+	).Where(goqu.Ex{"id": id}).ToSQL()
+	tx, _ := db.Begin()
+
+	r, err := tx.Exec(_sql)
+	rowsAff, _ := r.RowsAffected()
+
+	if rowsAff != 1 || err != nil {
+		tx.Rollback()
+	} else {
+		tx.Commit()
+	}
+
+	return err
+}
+
+func UnblockUser(id int) error {
+	_sql, _, _ := dialect.From("users").Update().Set(
+		goqu.Record{"blocked": 0},
+	).Where(goqu.Ex{"id": id}).ToSQL()
 	tx, _ := db.Begin()
 
 	r, err := tx.Exec(_sql)

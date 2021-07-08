@@ -30,7 +30,7 @@ func AddProvince(name string) error {
 }
 
 func UpdateProvince(id int, name string) error {
-	_sql, _, _ := dialect.Update("cities").Set(
+	_sql, _, _ := dialect.Update("province").Set(
 		goqu.Record{
 			"name": name,
 		},

@@ -26,6 +26,8 @@ func mountAdminRouters(router *gin.RouterGroup) {
 	adminRouter.GET("/orders/filter/user/:id", orderDetail)
 
 	adminRouter.GET("/users/:id", getUserInfo)
+	adminRouter.POST("/users/:id/block", blockUser)
+	adminRouter.POST("/users/:id/unblock", unblockUser)
 
 	adminRouter.POST("/city", addCity)
 	adminRouter.POST("/province", addProvince)
@@ -130,7 +132,7 @@ func addCity(c *gin.Context) {
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
-			"msg":  "无法获取用户",
+			"msg":  "添加失败",
 		})
 		return
 	}
@@ -147,7 +149,7 @@ func addProvince(c *gin.Context) {
 	if e != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"code": -1,
-			"msg":  "无法获取用户",
+			"msg":  "检查请求",
 		})
 		return
 	}
@@ -168,7 +170,7 @@ func updateCity(c *gin.Context) {
 		return
 	}
 
-	err = sqlconn.UpdateCity(ct.Id, ct.Name, *ct.Province, ct.Code)
+	err = sqlconn.UpdateCity(ct.Id, ct.Name, ct.Code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code": -2,
@@ -206,5 +208,59 @@ func updateProvince(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "好了",
+	})
+}
+
+func blockUser(c *gin.Context) {
+	uidStr := c.Param("id")
+	uid, err := strconv.Atoi(uidStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "检查请求",
+			"err":  err,
+		})
+		return
+	}
+	err = sqlconn.BlockUser(uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": -2,
+			"msg":  "更新失败",
+			"err":  err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功",
+	})
+}
+
+func unblockUser(c *gin.Context) {
+	uidStr := c.Param("id")
+	uid, err := strconv.Atoi(uidStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code": -1,
+			"msg":  "检查请求",
+			"err":  err,
+		})
+		return
+	}
+	err = sqlconn.UnblockUser(uid)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code": -2,
+			"msg":  "更新失败",
+			"err":  err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 200,
+		"msg":  "成功",
 	})
 }

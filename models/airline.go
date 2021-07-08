@@ -56,12 +56,16 @@ func FindAirlineById(id int) AirlineWithoutShifts {
 }
 
 func FetchAllAirlines(page uint) []Airline {
+	if page < 1 {
+		page = 1
+	}
+
 	rows, err := sqlconn.FetchAllAirlines(page)
-	defer rows.Close()
 
 	if err != nil {
 		return nil
 	}
+	defer rows.Close()
 
 	ret := make([]Airline, 0)
 

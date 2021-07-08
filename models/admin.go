@@ -66,6 +66,7 @@ func FetchAllUsers(page uint) []User {
 	for rows.Next() {
 		u := User{}
 		rows.Scan(&u.Id, &u.Username, &u.password, &u.salt, &u.Phone, &u.Email, &u.Validated, &u.Blocked)
+		us = append(us, u)
 	}
 
 	return us

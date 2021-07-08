@@ -29,17 +29,22 @@ func Login(username string, password string) (int, gin.H) {
 
 	auth := models.CheckPassword(password, u)
 
-	if auth {
+	if auth && !bool(u.Blocked) {
 		jwt, _ := genJwt(u)
 		return 200, gin.H{
 			"code": 0,
 			"msg":  "登陆成功",
 			"jwt":  jwt,
 		}
+	} else if bool(u.Blocked) {
+		return http.StatusUnauthorized, gin.H{
+			"code": -2,
+			"msg":  "用户已被封禁",
+		}
 	}
 
 	return http.StatusUnauthorized, gin.H{
-		"code": -2,
+		"code": -3,
 		"msg":  "密码错误",
 	}
 }

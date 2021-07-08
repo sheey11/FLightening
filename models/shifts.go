@@ -20,7 +20,8 @@ type Shift struct {
 	BusPrice           float32      `json:"business_price"`
 	FirPrice           float32      `json:"first_price"`
 	Vacancy            int          `json:"vacancy"`
-	airline            int
+	Airline            int          `json:"affiliate_airline"`
+	AirlineID          string       `json:"airline_id"`
 }
 
 func FindNearestNShifts(n uint, airline int) []Shift {
@@ -48,7 +49,7 @@ func FindNearestNShifts(n uint, airline int) []Shift {
 			&shift.BusPrice,
 			&shift.FirPrice,
 			&shift.Vacancy,
-			&shift.airline,
+			&shift.Airline,
 		)
 		if shift.ActualLanding_Null.Valid {
 			shift.ActualLanding = &shift.ActualLanding_Null.Time
@@ -78,7 +79,7 @@ func FindShiftById(id int) Shift {
 		&shift.BusPrice,
 		&shift.FirPrice,
 		&shift.Vacancy,
-		&shift.airline,
+		&shift.Airline,
 	)
 	if shift.ActualLanding_Null.Valid {
 		shift.ActualLanding = &shift.ActualLanding_Null.Time
@@ -91,6 +92,9 @@ func FindShiftById(id int) Shift {
 }
 
 func FetchAllShifts(page uint) []Shift {
+	if page < 1 {
+		page = 1
+	}
 	rows, err := sqlconn.FetchAllShifts(page)
 
 	if err != nil {
@@ -115,7 +119,8 @@ func FetchAllShifts(page uint) []Shift {
 			&shift.BusPrice,
 			&shift.FirPrice,
 			&shift.Vacancy,
-			&shift.airline,
+			&shift.Airline,
+			&shift.AirlineID,
 		)
 		if shift.ActualLanding_Null.Valid {
 			shift.ActualLanding = &shift.ActualLanding_Null.Time
