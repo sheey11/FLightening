@@ -16,3 +16,4 @@
 
 *.log
 .VSCodeCounter/
+__debug_bin
